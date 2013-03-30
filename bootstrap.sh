@@ -38,6 +38,16 @@ if [ ! -d "/home/vagrant/.ssh/id_rsa" ]; then
   $AS_USER "ssh-keygen -t dsa -N '' -C 'juju key' -f id_rsa"
 fi
 
+echo '### Services ###'
+
+echo '> Run mongodb'
+service mongodb start
+
+echo '> Run beanstalkd'
+service beanstalkd start
+
+echo '### juju ##'
+
 $AS_USER "juju bootstrap"
 
 echo "### TSURU ###"
@@ -50,7 +60,29 @@ curl -sL https://s3.amazonaws.com/tsuru/dist-server/tsuru-api.tar.gz | sudo tar 
 
 echo '> Configure tsuru'
 mkdir -p /etc/tsuru
-curl -sL https://raw.github.com/globocom/tsuru/master/etc/tsuru.conf -o /etc/tsuru/tsuru.conf
+# curl -sL https://raw.github.com/globocom/tsuru/master/etc/tsuru.conf -o /etc/tsuru/tsuru.conf
+
+echo $'
+listen: "0.0.0.0:8080"
+use-tls: false
+database:
+  url: 127.0.0.1:27017
+  name: tsuru
+git:
+  unit-repo: /home/application/current
+  host: 127.0.0.1
+  protocol: http
+  port: 8000
+bucket-support: false
+auth:
+  salt: tsuru-salt
+  token-expire-days: 2
+  token-key: TSURU-KEY
+juju:
+  charms-path: /home/vagrant/charms
+  units-collection: juju_units
+queue-server: "127.0.0.1:11300"
+admin-team: admin' > /etc/tsuru/tsuru.conf
 
 # gandalf
 
