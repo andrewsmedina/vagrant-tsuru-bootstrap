@@ -98,6 +98,8 @@ curl -sL https://raw.github.com/globocom/gandalf/master/etc/gandalf.conf -o /etc
 echo '> Run Gandalf'
 webserver &
 
-git daemon --base-path=/var/repositories --syslog --export-all &
+echo '> Run git daemon'
+mkdir -p /home/vagrant/repositories
+git daemon --base-path=/home/vagrant/repositories --syslog --export-all &
 
 echo '### The END ###'
