@@ -40,23 +40,32 @@ fi
 
 $AS_USER "juju bootstrap"
 
-
 echo "### TSURU ###"
 
+echo '> Download tsuru collector'
 curl -sL https://s3.amazonaws.com/tsuru/dist-server/tsuru-collector.tar.gz | sudo tar -xz -C /usr/bin
 
+echo '> Download tsuru api'
 curl -sL https://s3.amazonaws.com/tsuru/dist-server/tsuru-api.tar.gz | sudo tar -xz -C /usr/bin
 
-mkdir /etc/tsuru
+echo '> Configure tsuru'
+mkdir -p /etc/tsuru
 curl -sL https://raw.github.com/globocom/tsuru/master/etc/tsuru.conf -o /etc/tsuru/tsuru.conf
 
-# tsuru gandalf
+# gandalf
 
+echo '> Download Gandalf'
 curl -sL https://s3.amazonaws.com/tsuru/dist-server/gandalf-bin.tar.gz | sudo tar -xz -C /usr/bin
+
+echo '> Download Gandalf webserver'
 curl -sL https://s3.amazonaws.com/tsuru/dist-server/gandalf-webserver.tar.gz | sudo tar -xz -C /usr/bin
 
+echo '> Configure Gandalf'
 curl -sL https://raw.github.com/globocom/gandalf/master/etc/gandalf.conf -o /etc/gandalf.conf
 
+echo '> Run Gandalf'
 webserver &
 
 git daemon --base-path=/var/repositories --syslog --export-all &
+
+echo '### The END ###'
