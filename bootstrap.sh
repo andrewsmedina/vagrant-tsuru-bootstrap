@@ -78,6 +78,7 @@ auth:
   salt: tsuru-salt
   token-expire-days: 2
   token-key: TSURU-KEY
+  hash-cost: 4
 juju:
   charms-path: /home/vagrant/charms
   units-collection: juju_units
@@ -93,13 +94,25 @@ echo '> Download Gandalf webserver'
 curl -sL https://s3.amazonaws.com/tsuru/dist-server/gandalf-webserver.tar.gz | sudo tar -xz -C /usr/bin
 
 echo '> Configure Gandalf'
-curl -sL https://raw.github.com/globocom/gandalf/master/etc/gandalf.conf -o /etc/gandalf.conf
+echo 'bin-path: /usr/bin/gandalf-bin
+database:
+    url: 127.0.0.1:27017
+    name: gandalf
+git:
+    bare:
+        location: /home/vagrant/repositories
+        #template: /home/git/bare-template # optional
+host: localhost
+webserver:
+    port: ":8000"
+uid: vagrant' > /etc/gandalf.con
 
 echo '> Run Gandalf'
-webserver &
+gandalf-webserver &
 
 echo '> Run git daemon'
 mkdir -p /home/vagrant/repositories
+chown vagrant:vagrant /home/vagrant/repositories -R
 git daemon --base-path=/home/vagrant/repositories --syslog --export-all &
 
 echo '### The END ###'
