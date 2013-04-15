@@ -51,12 +51,19 @@ echo '### juju ##'
 $AS_USER "juju bootstrap"
 
 echo "### TSURU ###"
+apt-get install -y golang-go git mercurial bzr gcc
+echo 'export GOPATH=/home/vagrant/.go' >> /home/vagrant/.bashrc
+echo 'export PATH=${GOPATH}/bin:${PATH}' >> /home/vagrant/.bashrc
+$AS_USER 'source ~/.bashrc'
+$AS_USER 'go get github.com/globocom/tsuru/api'
+$AS_USER 'go get github.com/globocom/tsuru/collector'
 
-echo '> Download tsuru collector'
-curl -sL https://s3.amazonaws.com/tsuru/dist-server/tsuru-collector.tar.gz | sudo tar -xz -C /usr/bin
 
-echo '> Download tsuru api'
-curl -sL https://s3.amazonaws.com/tsuru/dist-server/tsuru-api.tar.gz | sudo tar -xz -C /usr/bin
+#echo '> Download tsuru collector'
+#curl -sL https://s3.amazonaws.com/tsuru/dist-server/tsuru-collector.tar.gz | sudo tar -xz -C /usr/bin
+#
+#echo '> Download tsuru api'
+#curl -sL https://s3.amazonaws.com/tsuru/dist-server/tsuru-api.tar.gz | sudo tar -xz -C /usr/bin
 
 echo '> Configure tsuru'
 mkdir -p /etc/tsuru
@@ -82,7 +89,16 @@ auth:
 juju:
   charms-path: /home/vagrant/charms
   units-collection: juju_units
-queue-server: "127.0.0.1:11300"
+queue-server: "127.0.2.1:11300"
+provisioner: docker
+docker:
+  collection: docker
+  authorized-key-path: /home/vagrant/.ssh/id_rsa.pub
+  formulas-path: /home/vagrant/charms/precise
+  domain: godock.org
+  routes-path: /etc/nginx/sites-enabled
+  ip-timeout: 200
+  binary: /home/vagrant/.go/bin/docker
 admin-team: admin' > /etc/tsuru/tsuru.conf
 
 # gandalf
@@ -100,19 +116,28 @@ database:
     name: gandalf
 git:
     bare:
-        location: /home/vagrant/repositories
+        location: /var/repositories
         #template: /home/git/bare-template # optional
 host: localhost
 webserver:
     port: ":8000"
-uid: vagrant' > /etc/gandalf.con
+uid: git' > /etc/gandalf.conf
 
 echo '> Run Gandalf'
-gandalf-webserver &
+#gandalf-webserver &
 
 echo '> Run git daemon'
-mkdir -p /home/vagrant/repositories
-chown vagrant:vagrant /home/vagrant/repositories -R
-git daemon --base-path=/home/vagrant/repositories --syslog --export-all &
+useradd git
+mkdir -p /home/git/.ssh
+touch /home/git/.ssh/authorized_keys
+mkdir -p /var/repositories
+chown git:git -R /var/repositories
+chown git:git -R /home/git
+#git daemon --base-path=/var/repositories --syslog --export-all &
 
+echo "install docker"
+apt-get -y install lxc wget bsdtar curl vim
+echo 'download docker'
+wget http://get.docker.io/builds/$(uname -s)/$(uname -m)/docker-master.tgz 
+tar -xf docker-master.tgz
 echo '### The END ###'
