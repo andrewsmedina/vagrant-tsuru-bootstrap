@@ -55,8 +55,8 @@ apt-get install -y golang-go git mercurial bzr gcc
 echo 'export GOPATH=/home/vagrant/.go' >> /home/vagrant/.bashrc
 echo 'export PATH=${GOPATH}/bin:${PATH}' >> /home/vagrant/.bashrc
 $AS_USER 'source ~/.bashrc'
-$AS_USER 'go get github.com/globocom/tsuru/api'
-$AS_USER 'go get github.com/globocom/tsuru/collector'
+$AS_USER 'go get github.com/tsuru/tsuru/api'
+$AS_USER 'go get github.com/tsuru/tsuru/collector'
 
 
 #echo '> Download tsuru collector'
@@ -67,7 +67,7 @@ $AS_USER 'go get github.com/globocom/tsuru/collector'
 
 echo '> Configure tsuru'
 mkdir -p /etc/tsuru
-# curl -sL https://raw.github.com/globocom/tsuru/master/etc/tsuru.conf -o /etc/tsuru/tsuru.conf
+# curl -sL https://raw.github.com/tsuru/tsuru/master/etc/tsuru.conf -o /etc/tsuru/tsuru.conf
 
 echo $'
 listen: "0.0.0.0:8080"
